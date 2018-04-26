@@ -1,3 +1,4 @@
+import sys
 import time
 from math import log
 
@@ -10,7 +11,7 @@ from world import World
 
 
 class View:
-    radius = 4
+    radius = 6
     GRAPH_SIZE = 300
 
     def __init__(self, model: World):
@@ -98,6 +99,22 @@ class View:
         pygame.draw.circle(self.display, color, coord, radius, width)
 
     def _calc_color(self, cell: Cell, other=None) -> TColor:
+        birth = cell
+        live = other
+        if isinstance(cell, Cell):
+            birth = cell.birth
+            live = cell.live
+
+        index = birth + live
+        index = sum([a * (2 ** i) for i, a in enumerate(index)])
+        index += 1
+        divider = 4
+        red = int(index // divider // divider % divider * 255/divider)
+        green = int(index // divider % divider * 255 /divider)
+        blue = int(index % divider * 255 / divider)
+        return red, green, blue
+
+    def _old_calc_color(self, cell: Cell, other=None) -> TColor:
         birth = cell
         live = other
         if isinstance(cell, Cell):
