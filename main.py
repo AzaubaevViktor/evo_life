@@ -37,21 +37,25 @@ class Cell:
                     self.live[index] = 1
         self.age = 0
 
-    def is_birth(self, value):
-        if value < self.MIN_ALIVE or value >= self.MAX_ALIVE:
+    @classmethod
+    def _is_birth(cls, birth: List[int], value: int):
+        if value < cls.MIN_ALIVE or value >= cls.MAX_ALIVE:
             return False
-        return self.birth[value - self.MIN_ALIVE] == 1
+        return birth[value - cls.MIN_ALIVE] == 1
 
-    def is_alive(self, value):
+    def is_birth(self, value: int) -> bool:
+        return self._is_birth(self.birth, value)
+
+    def is_alive(self, value: int) -> bool:
         if value < self.MIN_ALIVE or value >= self.MAX_ALIVE:
             return False
         return self.live[value - self.MIN_ALIVE] == 1
 
-    def is_dead(self):
+    def is_dead(self) -> bool:
         return self.age > self.EXPECT
 
     @classmethod
-    def generate_new(cls, cells: List["Cell"], mutation_coef: int=0.001) -> Union["Cell", None]:
+    def generate_new(cls, cells: List["Cell"], neight_count: int, mutation_coef: int=0.001) -> Union["Cell", None]:
         k = mutation_coef
         if len(cells) == 0:
             return None
@@ -64,6 +68,9 @@ class Cell:
             if random() < k:
                 n = 1 - n
             birth.append(n)
+
+        if not cls._is_birth(birth, neight_count):
+            return None
 
         live = []
         for l in range(size):
@@ -150,7 +157,7 @@ class World:
         for x, y, cell in self._iter_by(self.cells):
             neight = self._neight_count(x, y)
             if cell is None:
-                cell = Cell.generate_new(list(self._neight(x, y)))
+                cell = Cell.generate_new(list(self._neight(x, y)), neight)
 
                 if (cell is not None) and (not cell.is_birth(neight)):
                     cell = None
